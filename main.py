@@ -1,8 +1,9 @@
-import json
 import sqlite3
 import requests
-import re
 from bs4 import BeautifulSoup
+
+import questionParser
+import answerParser
 
 
 def initDB():
@@ -11,43 +12,46 @@ def initDB():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS stackoverflow
         (
-            id     INT PRIMARY KEY,
-            type   TEXT,
-            status TEXT,
-            tags   TEXT
-        );
+            id           INT PRIMARY KEY,
+            type         TEXT,
+            status       TEXT,
+            tags         TEXT,
+            creationtime TIMESTAMP,
+            edittime     TIMESTAMP,
+            viewcount    INT
+        );  
         """)
     return db, cursor
 
 
-def insertData(id: int, type: str, status: str, tags):
+def insertData(id: int, type: str, status: str, tags, creationTime, editTime, viewCount):
     cursor.execute(f"""
-                INSERT INTO stackoverflow
-                    (id,
-                    type,
-                    status,
-                    tags)
-                VALUES
-                    ({id},
-                    '{type}',
-                    '{status}',
-                    '{tags}');
+        INSERT INTO stackoverflow
+            (id,
+            type,
+            status,
+            tags,
+            creationtime,
+            edittime,
+            viewcount)
+        VALUES      
+            ({id},
+             '{type}',
+             '{status}',
+             '{tags}',
+             '{creationTime}',
+             '{editTime}',
+             '{viewCount}');  
                 """)
 
 
-def getStatus(html):
-    return "deleted" if html.select('h1.fs-headline1:-soup-contains("Page not found")') else "online"
+def getStatus(rr):
+    return "deleted" if rr.status_code == 404 else "online"
 
 
 def getType(r):
     return "question" if r.headers['Location'].startswith(
         f"/questions/{id}") else "answer"
-
-
-def getTags(html):
-    taglist = html.find("div", {"class": "post-taglist"})
-    tags = taglist.findChildren("a", {"class": "post-tag"})
-    return json.dumps([tag.text for tag in tags])
 
 
 if __name__ == '__main__':
@@ -57,18 +61,33 @@ if __name__ == '__main__':
 
     while id < 10:
         id += 1
-        print(id)
         r = requests.get(f"https://stackoverflow.com/questions/{id}",
                          allow_redirects=False)
-        html = BeautifulSoup(requests.get(
-            f"https://stackoverflow.com/questions/{id}").text, 'html.parser')
+        rr = requests.get(
+            f"https://stackoverflow.com/questions/{id}")
+        html = BeautifulSoup(rr.text, 'html.parser')
 
         type = getType(r)
-        status = getStatus(html)
-        tags = getTags(
-            html) if type == "question" and status == "online" else None
+        status = getStatus(rr)
 
-        insertData(id, type, status, tags)
+        if("question"):
+            if status == "online":
+                tags = questionParser.getTags(html)
+                creationTime, editTime, viewCount = questionParser.getTimeStats(
+                    html)
+
+            else:
+                tags = None
+                creationTime = None
+                editTime = None
+                viewCount = None
+        else:
+            tags = None
+            viewCount = None
+            creationTime = None
+            editTime = None
+
+        insertData(id, type, status, tags, creationTime, editTime, viewCount)
         db.commit()
 
     db.close()
