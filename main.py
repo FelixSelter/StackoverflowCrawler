@@ -19,7 +19,7 @@ def initDB():
             creationtime TIMESTAMP,
             edittime     TIMESTAMP,
             viewcount    INT
-        );  
+        );
         """)
     return db, cursor
 
@@ -34,19 +34,19 @@ def insertData(id: int, type: str, status: str, tags, creationTime, editTime, vi
             creationtime,
             edittime,
             viewcount)
-        VALUES      
+        VALUES
             ({id},
              '{type}',
              '{status}',
              '{tags}',
              '{creationTime}',
              '{editTime}',
-             '{viewCount}');  
+             '{viewCount}');
                 """)
 
 
 def getStatus(rr):
-    return "deleted" if rr.status_code == 404 else "online"
+    return "removed" if rr.status_code == 404 else "online"
 
 
 def getType(r):
@@ -61,31 +61,26 @@ if __name__ == '__main__':
 
     while id < 10:
         id += 1
+        print(id)
         r = requests.get(f"https://stackoverflow.com/questions/{id}",
                          allow_redirects=False)
         rr = requests.get(
             f"https://stackoverflow.com/questions/{id}")
         html = BeautifulSoup(rr.text, 'html.parser')
 
+        type, status, tags, creationTime, editTime, viewCount = None, None, None, None, None, None
         type = getType(r)
         status = getStatus(rr)
 
-        if("question"):
-            if status == "online":
+        if status == "online":
+            if(type == "question"):
                 tags = questionParser.getTags(html)
                 creationTime, editTime, viewCount = questionParser.getTimeStats(
                     html)
 
             else:
-                tags = None
-                creationTime = None
-                editTime = None
-                viewCount = None
-        else:
-            tags = None
-            viewCount = None
-            creationTime = None
-            editTime = None
+                creationTime, editTime, status = answerParser.getTimeStats(
+                    html, id, status)
 
         insertData(id, type, status, tags, creationTime, editTime, viewCount)
         db.commit()
