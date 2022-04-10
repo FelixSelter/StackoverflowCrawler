@@ -45,7 +45,7 @@ def requestData(id):
 
 
 if __name__ == '__main__':
-    RATELIMIT = 90
+    RATELIMIT = 50
 
     db, cursor = sqliteUtils.initDB()
     id = cursor.execute(
