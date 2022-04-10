@@ -11,7 +11,7 @@ def getStatus(rr):
     return "removed" if rr.status_code == 404 else "online"
 
 
-def getType(r):
+def getType(r, id):
     """Will check if the id belongs to an answer or a question
 
     Args:

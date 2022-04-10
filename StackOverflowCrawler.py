@@ -62,7 +62,7 @@ if __name__ == '__main__':
         html = BeautifulSoup(rr.text, 'html.parser')
         type, status, tags, creationTime, editTime, viewCount, accepted, score, wiki, author, editor, answers, comments = [
             None for i in range(13)]
-        type = questionAnswerParser.getType(r)
+        type = questionAnswerParser.getType(r, id)
         status = questionAnswerParser.getStatus(rr)
 
         if status == "online":
