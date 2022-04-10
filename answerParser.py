@@ -1,13 +1,13 @@
 from datetime import datetime
 from os import times
-from re import S
+import re
 
 
 def getAnswerStats(html, id, status):
     answer = html.find(
         "div", {"id": f"answer-{id}"})
     if answer is None:
-        return None, None, "deleted", None, None, None
+        return None, None, "deleted", None, None, None, None, None
 
     accepted = False
     if "accepted-answer" in answer["class"]:
@@ -15,8 +15,10 @@ def getAnswerStats(html, id, status):
 
     score = answer["data-score"]
 
-    editTime, creationTime = None, None
+    editTime, creationTime, author, editor = None, None, None, None
     timestats = answer.find_all("div", {"class": "user-info"})
+    if len(timestats) > 2:
+        raise Exception("More than two timestats")
 
     for timestat in timestats:
         wiki = True if not timestat.find(
@@ -25,11 +27,23 @@ def getAnswerStats(html, id, status):
         if wiki is False:
             time = timestat.find(
                 "span", {"class": "relativetime"})
+
             if(time.previous_sibling.strip() == "answered"):
                 creationTime = datetime.fromisoformat(
                     time["title"][0:-1].replace(" ", "T"))
+                details = timestat.find(
+                    "div", {"class": "user-details"})
+                author = details.find("a")
+                author = author.text if author is not None else details.contents[0].strip(
+                )
+
             elif time.previous_sibling.strip() == "edited":
                 editTime = datetime.fromisoformat(
                     time["title"][0:-1].replace(" ", "T"))
+                details = timestat.find(
+                    "div", {"class": "user-details"})
+                editor = details.find("a")
+                editor = editor.text if editor is not None else details.contents[0].strip(
+                )
 
-    return creationTime, editTime, status, accepted, score, wiki
+    return creationTime, editTime, status, accepted, score, wiki, author, editor

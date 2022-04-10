@@ -22,13 +22,15 @@ def initDB():
             viewcount    INT,
             accepted     INT,
             score        INT,
-            wiki         INT
+            wiki         INT,
+            author       TEXT,
+            editor       TEXT
         );
         """)
     return db, cursor
 
 
-def insertData(id: int, type: str, status: str, tags, creationTime, editTime, viewCount, accepted, score, wiki):
+def insertData(id: int, type: str, status: str, tags, creationTime, editTime, viewCount, accepted, score, wiki, author, editor):
     cursor.execute(f"""
         INSERT INTO stackoverflow
             (id,
@@ -40,7 +42,9 @@ def insertData(id: int, type: str, status: str, tags, creationTime, editTime, vi
             viewcount,
             accepted,
             score,
-            wiki)
+            wiki,
+            author,
+            editor)
         VALUES
             ({id},
              '{type}',
@@ -51,7 +55,9 @@ def insertData(id: int, type: str, status: str, tags, creationTime, editTime, vi
              '{viewCount}',
              '{accepted}',
              '{score}',
-             '{wiki}');
+             '{wiki}',
+             '{author}',
+             '{editor}');
                 """)
 
 
@@ -91,7 +97,8 @@ def requestData(id):
 if __name__ == '__main__':
 
     db, cursor = initDB()
-    id = cursor.execute("SELECT MAX(id) FROM stackoverflow").fetchone()[0] or 0
+    id = cursor.execute(
+        "SELECT MAX(id) FROM stackoverflow").fetchone()[0] or 0
     counter = id
 
     while id < counter + 10:
@@ -100,7 +107,8 @@ if __name__ == '__main__':
 
         r, rr = requestData(id)
         html = BeautifulSoup(rr.text, 'html.parser')
-        type, status, tags, creationTime, editTime, viewCount, accepted, score, wiki = None, None, None, None, None, None, None, None, None
+        type, status, tags, creationTime, editTime, viewCount, accepted, score, wiki, author, editor = [
+            None for i in range(11)]
         type = getType(r)
         status = getStatus(rr)
 
@@ -112,11 +120,11 @@ if __name__ == '__main__':
                 score = questionParser.getScore(html)
 
             else:
-                creationTime, editTime, status, accepted, score, wiki = answerParser.getAnswerStats(
+                creationTime, editTime, status, accepted, score, wiki, author, editor = answerParser.getAnswerStats(
                     html, id, status)
 
         insertData(id, type, status, tags, creationTime,
-                   editTime, viewCount, accepted, score, wiki)
+                   editTime, viewCount, accepted, score, wiki, author, editor)
         db.commit()
 
     db.close()
