@@ -18,3 +18,8 @@ def getTimeStats(html):
     viewCount = int(re.search(r"Viewed (.+) times", statsbar.find(
         "div", {"title": re.compile(r"Viewed .+ times")})["title"]).group(1).replace(",", ""))
     return creationTime, editTime, viewCount
+
+
+def getScore(html):
+    return html.find(
+        "div", {"id": "question"})["data-score"]
