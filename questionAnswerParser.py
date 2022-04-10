@@ -1,14 +1,19 @@
-def getStatus(rr):
+def getStatus(r, rr):
     """Will check if the id was deleted by the moderators so theres a 404 status
 
     Args:
+        r (request): The unredirected request object
         rr (request): The redirected request object
 
     Returns:
-        _type_: _description_
+        str: Can be "removed", "deleted", "moved" or "online"
     """
 
-    return "removed" if rr.status_code == 404 else "online"
+    status = "removed" if rr.status_code == 404 else "online"
+    if not f"https://stackoverflow.com{r.headers['Location']}" == rr.url:
+        status = "moved"
+
+    return status
 
 
 def getType(r, id):
@@ -16,13 +21,14 @@ def getType(r, id):
 
     Args:
         r (request): request object containing redirection header
+        id (int): The id of eather question or answer that should be parsed.
 
     Returns:
         string: Eather "question" or "answer" depending on the id
     """
 
     return "question" if r.headers['Location'].startswith(
-        f"/questions/{id}") else "answer"
+        f"/questions/{id}/") else "answer"
 
 
 def getComments(html, id):
@@ -30,7 +36,7 @@ def getComments(html, id):
 
     Args:
         html (bs4 document): The Beautiful Soup 4 document of the question page.
-        id (int): The if of eather question or answer that should be parsed.
+        id (int): The id of eather question or answer that should be parsed.
 
     Returns:
         int: The amount of comments
