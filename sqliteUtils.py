@@ -55,7 +55,7 @@ def insertData(cursor, id: int, type: str, status: str, tags: list[str], creatio
         comments (int): How many comments the question or answer has
     """
 
-    cursor.execute(f"""
+    cursor.execute("""
         INSERT INTO stackoverflow
                     (id,
                     type,
@@ -71,7 +71,21 @@ def insertData(cursor, id: int, type: str, status: str, tags: list[str], creatio
                     editor,
                     answers,
                     comments)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,);""",
+        VALUES     (?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ? );  
+                    """,
                    (id,
                     type,
                     status,
