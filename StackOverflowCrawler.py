@@ -42,7 +42,7 @@ def requestData(id):
                 sleep(10)
                 continue
 
-        if r.status_code == 100000:  # Disable this for now
+        if r.status_code == 429 or rr.status_code == 429:
             print("RATELIMIT waiting 5 minutes")
             sleep(5*60)
             continue
