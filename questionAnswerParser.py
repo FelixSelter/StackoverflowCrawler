@@ -1,3 +1,6 @@
+from os import stat
+
+
 def getStatus(r, rr):
     """Will check if the id was deleted by the moderators so theres a 404 status
 
@@ -10,22 +13,26 @@ def getStatus(r, rr):
     """
 
     status = "removed" if rr.status_code == 404 else "online"
-    if not f"https://stackoverflow.com{r.headers['Location']}" == rr.url:
+    if not status == "removed" and not f"https://stackoverflow.com{r.headers['Location']}" == rr.url:
         status = "moved"
 
     return status
 
 
-def getType(r, id):
+def getType(r, id, status):
     """Will check if the id belongs to an answer or a question
 
     Args:
         r (request): request object containing redirection header
         id (int): The id of eather question or answer that should be parsed.
+        status (str): Tells if it was removed
 
     Returns:
         string: Eather "question" or "answer" depending on the id
     """
+
+    if (status == "removed" and not "Location" in r.headers):
+        return "404"
 
     return "question" if r.headers['Location'].startswith(
         f"/questions/{id}/") else "answer"

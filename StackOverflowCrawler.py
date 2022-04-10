@@ -42,7 +42,7 @@ def requestData(id):
                 sleep(10)
                 continue
 
-        if r.status_code == 301:
+        if r.status_code == 100000:  # Disable this for now
             print("RATELIMIT waiting 5 minutes")
             sleep(5*60)
             continue
@@ -70,8 +70,8 @@ if __name__ == '__main__':
         html = BeautifulSoup(rr.text, 'html.parser')
         type, status, tags, creationTime, editTime, viewCount, accepted, score, wiki, author, editor, answers, comments = [
             None for i in range(13)]
-        type = questionAnswerParser.getType(r, id)
         status = questionAnswerParser.getStatus(r, rr)
+        type = questionAnswerParser.getType(r, id, status)
 
         if status == "online":
 
