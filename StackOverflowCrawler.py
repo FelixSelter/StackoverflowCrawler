@@ -22,24 +22,32 @@ def requestData(id):
     """
 
     while True:
-        try:
-            r = requests.get(f"https://stackoverflow.com/questions/{id}",
-                             allow_redirects=False, timeout=10)
-            break
-        except:
-            print(f"Connection error problems with ID: {id}")
-            sleep(10)
-            continue
+        while True:
+            try:
+                r = requests.get(f"https://stackoverflow.com/questions/{id}",
+                                 allow_redirects=False, timeout=10)
+                break
+            except:
+                print(f"Connection error problems with ID: {id}")
+                sleep(10)
+                continue
 
-    while True:
-        try:
-            rr = requests.get(
-                f"https://stackoverflow.com/questions/{id}", timeout=10)
-            break
-        except:
-            print(f"Connection error problems with ID: {id}")
-            sleep(10)
+        while True:
+            try:
+                rr = requests.get(
+                    f"https://stackoverflow.com/questions/{id}", timeout=10)
+                break
+            except:
+                print(f"Connection error problems with ID: {id}")
+                sleep(10)
+                continue
+
+        if r.status_code == 301:
+            print("RATELIMIT waiting 5 minutes")
+            sleep(5*60)
             continue
+        else:
+            break
 
     return r, rr
 
