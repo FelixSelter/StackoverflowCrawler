@@ -28,7 +28,13 @@ def getAnswerStats(html, id, status):
             time = timestat.find(
                 "span", {"class": "relativetime"})
 
-            if(time.previous_sibling.strip() == "answered"):
+            # edgecase 364
+            action = time.previous_sibling
+            if action is None:
+                action = time.parent.previous_sibling
+            action = action.strip()
+
+            if(action == "answered"):
                 creationTime = datetime.fromisoformat(
                     time["title"][0:-1].replace(" ", "T"))
                 details = timestat.find(
@@ -37,7 +43,7 @@ def getAnswerStats(html, id, status):
                 author = author.text if author is not None else details.contents[0].strip(
                 )
 
-            elif time.previous_sibling.strip() == "edited":
+            elif action == "edited":
                 editTime = datetime.fromisoformat(
                     time["title"][0:-1].replace(" ", "T"))
                 details = timestat.find(
