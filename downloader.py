@@ -23,7 +23,7 @@ cursor.execute("""
               )
       """)
 
-RATELIMIT = 40
+RATELIMIT = 35
 
 currentID = cursor.execute(
     "SELECT MAX(id) FROM soitems").fetchone()[0] or 0
@@ -32,7 +32,7 @@ requestCounter = 0
 
 while currentID < 72000000:
     currentID += 1
-    print(currentID)
+    print("Downloading:", currentID)
 
     while True:
         while True:

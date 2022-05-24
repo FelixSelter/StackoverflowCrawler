@@ -159,7 +159,7 @@ def getComments(html, id):
 
     Args:
         html (bs4 document): The Beautiful Soup 4 document of the question page.
-        id (int): The id of eather question or answer that should be parsed.
+        id (int): The id of either question or answer that should be parsed.
 
     Returns:
         int: The amount of comments
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     while True:
         id += 1
         info(f"Processing: {id}")
-        if (id % 1 == 0):
+        if id % 1 == 0:
             print(f"Processing: {id}")
 
         data = cursor_source.execute("""
@@ -269,6 +269,6 @@ if __name__ == "__main__":
                     "The database returned no entries for 10 consecutive times."
                     "This is probably due to the end of the database.")
             continue
-            
+
         none_counter = 0
         parseItem(id, data[0])
